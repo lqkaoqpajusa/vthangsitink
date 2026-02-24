@@ -2482,27 +2482,30 @@ Library = loadstring(game:HttpGet("https://luacrack.site/index.php/anhkhoarb500g
 if Library.SetColors then
     Library:SetColors({
         Background      = Color3.fromRGB(0, 0, 0),
-        Header          = Color3.fromRGB(10, 10, 10),
-        DarkContrast    = Color3.fromRGB(15, 15, 15),
-        LightContrast   = Color3.fromRGB(25, 25, 25),
-        SchemeColor     = Color3.fromRGB(255, 220, 50),
+        Header          = Color3.fromRGB(5, 5, 5),
+        DarkContrast    = Color3.fromRGB(10, 10, 10),
+        LightContrast   = Color3.fromRGB(18, 18, 18),
+        SchemeColor     = Color3.fromRGB(0, 220, 255),
         TextColor       = Color3.fromRGB(255, 255, 255),
-        BorderColor     = Color3.fromRGB(255, 220, 50),
-        ButtonColor     = Color3.fromRGB(255, 220, 50),
+        BorderColor     = Color3.fromRGB(0, 220, 255),
+        ButtonColor     = Color3.fromRGB(0, 220, 255),
         ButtonTextColor = Color3.fromRGB(0, 0, 0),
-        ToggleColor     = Color3.fromRGB(255, 220, 50),
+        ToggleColor     = Color3.fromRGB(0, 220, 255),
+        Transparency    = 0.35,
     })
 elseif Library.SetScheme then
-    Library:SetScheme(Color3.fromRGB(255, 220, 50))
+    Library:SetScheme(Color3.fromRGB(0, 220, 255))
 end
 Window = Library:CreateWindow({
-    Title = "BANANÃO HUB",
+    Title = "Eclipse Hub",
     Subtitle = "- Blox Fruit",
-    Image = "rbxassetid://72077522197705"
+    Image = "rbxassetid://112518061635682",
+    Icon  = "rbxassetid://112518061635682",
+    Transparency = 0.35,
 })
 wait(1)
 Library:Notify({
-    Title = "BANANÃO HUB",
+    Title = "Eclipse Hub",
     Description = "The UI automatically hides once executed.\nPress the button at the bottom-left of the screen to show the GUI.",
     Duration = 3
 })
@@ -2549,7 +2552,7 @@ ReportIdeas:AddButton({
             embedTitle = "💡 New Idea"
         end
         local data = {
-            ["username"] = "BANANÃO HUB BOT",
+            ["username"] = "Eclipse Hub BOT",
             ["avatar_url"] = "https://cdn.discordapp.com/attachments/...",
             ["embeds"] = {{
                 ["title"] = embedTitle,
@@ -2580,7 +2583,7 @@ ReportIdeas:AddButton({
                     }
                 },
                 ["footer"] = {
-                    ["text"] = "BANANÃO HUB • " .. time,
+                    ["text"] = "Eclipse Hub • " .. time,
                     ["icon_url"] = "https://cdn.discordapp.com/attachments/..."
                 },
                 ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
@@ -4135,7 +4138,7 @@ MeterialFarm:AddToggle("MasteryStart", {
         _G.MasteryFarmStart = Value
         if not _G.StartFarn then
         Library:Notify({
-            Title = "BANANÃO HUB",
+            Title = "Eclipse Hub",
             Description = "Open Start Farm Plz!",
             Duration = 3
         })
@@ -4252,7 +4255,7 @@ MeterialFarm:AddToggle("MeterialStart", {
         _G.AutoMaterial = Value
         if not _G.StartFarm then
             Library:Notify({
-                Title = "BANANÃO HUB",
+                Title = "Eclipse Hub",
                 Description = "Open Start Farm Plz!",
                 Duration = 3
             })
@@ -4475,7 +4478,7 @@ DevilFarm:AddToggle("DevilFarmHopServer", {
         _G.HopFruitsFarm = Value
         if not _G.TwFruits then
             Library:Notify({
-                Title = "BANANÃO HUB",
+                Title = "Eclipse Hub",
                 Description = "Open Teleport to Fruit Plz!",
                 Duration = 3
             })
@@ -4629,7 +4632,7 @@ RipIndraBoss:AddToggle("EliteHunterFarmHop", {
         _G.EliteHop = Value
         if not _G.TwFruits then
             Library:Notify({
-                Title = "BANANÃO HUB",
+                Title = "Eclipse Hub",
                 Description = "Open Auto Elite Hunter Plz!",
                 Duration = 3
             })
@@ -4770,7 +4773,7 @@ SoulReaperBoss:AddToggle("SoulReaperHop", {
         _G.SoulHopR = Value
         if not _G.AutoHytHallow then
             Library:Notify({
-                Title = "BANANÃO HUB",
+                Title = "Eclipse Hub",
                 Description = "Open Auto Soul Reaper Plz!",
                 Duration = 3
             })
@@ -4820,7 +4823,7 @@ DoughKingBoss:AddToggle("DoughKingHop", {
         _G.DoughKingHop = Value
         if not _G.AutoMiror then
             Library:Notify({
-                Title = "BANANÃO HUB",
+                Title = "Eclipse Hub",
                 Description = "Open Auto Dough King Plz!",
                 Duration = 3
             })
@@ -4872,7 +4875,7 @@ DarkbeardBoss:AddToggle("DarkBreadHop", {
         _G.DarkbreadHop = Value
         if not _G.Auto_Def_DarkCoat then
             Library:Notify({
-                Title = "BANANÃO HUB",
+                Title = "Eclipse Hub",
                 Description = "Open Auto Darkbread Plz!",
                 Duration = 3
             })
@@ -5331,7 +5334,7 @@ BerryFarm:AddToggle("BerryFarmHop", {
         _G.HopBerry = Value
         if not _G.AutoBerry then
             Library:Notify({
-                Title = "BANANÃO HUB",
+                Title = "Eclipse Hub",
                 Description = "Open Auto Berry Plz!",
                 Duration = 3
             })
@@ -5411,7 +5414,7 @@ ChestFarm:AddToggle("ChestHopAuto", {
         _G.ChestHop = Value
         if not _G.AutoFarmChest then
             Library:Notify({
-                Title = "BANANÃO HUB",
+                Title = "Eclipse Hub",
                 Description = "Open Auto Chest Plz!",
                 Duration = 3
             })
@@ -5654,7 +5657,7 @@ ObservationFarm:AddToggle("ObservationHop", {
         _G.ObservationFarmHop = Value
         if not _G.obsFarm then
             Library:Notify({
-                Title = "BANANÃO HUB",
+                Title = "Eclipse Hub",
                 Description = "Open Auto Observation Plz!",
                 Duration = 3
             })
@@ -7499,7 +7502,7 @@ GetItems:AddToggle("AutoHopColorAndSword", {
         _G.AutoHopColorAndSword = Value
         if not _G.Auto_Buy_Legendary_Sword and not _G.HakiColorBusoBuy then
             Library:Notify({
-                Title = "BANANÃO HUB",
+                Title = "Eclipse Hub",
                 Description = "Open Buy Haki Color or Legendary Sword Plz!",
                 Duration = 3
             })
