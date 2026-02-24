@@ -338,10 +338,12 @@ weaponSc = function(weapon)
         end
     end
 end
-hookfunction(require(game:GetService("ReplicatedStorage").Effect.Container.Death), function() end)
-hookfunction(require(game:GetService("ReplicatedStorage"):WaitForChild("GuideModule")).ChangeDisplayedNPC, function() end)
-hookfunction(error, function() end)
-hookfunction(warn, function() end)
+if hookfunction then
+    pcall(function() hookfunction(require(game:GetService("ReplicatedStorage").Effect.Container.Death), function() end) end)
+    pcall(function() hookfunction(require(game:GetService("ReplicatedStorage"):WaitForChild("GuideModule")).ChangeDisplayedNPC, function() end) end)
+    pcall(function() hookfunction(error, function() end) end)
+    pcall(function() hookfunction(warn, function() end) end)
+end
 Rock = workspace:FindFirstChild("Rocks")
 if Rock then
     Rock:Destroy()
@@ -603,10 +605,12 @@ Useskills = function(weapon, skill)
         vim1:SendKeyEvent(false, "Y", false, game)
     end
 end
-gg = getrawmetatable(game)
-old = gg.__namecall
-setreadonly(gg, false)
-gg.__namecall = newcclosure(function(...)
+pcall(function()
+    if getrawmetatable and setreadonly and newcclosure and getnamecallmethod then
+        gg = getrawmetatable(game)
+        old = gg.__namecall
+        setreadonly(gg, false)
+        gg.__namecall = newcclosure(function(...)
     local method = getnamecallmethod()
     local args = {...}
     if tostring(method) == "FireServer" then
@@ -620,6 +624,8 @@ gg.__namecall = newcclosure(function(...)
         end
     end
     return old(...)
+end)
+    end
 end)
 GetConnectionEnemies = function(a)
     for i,v in pairs(replicated:GetChildren()) do
@@ -2179,7 +2185,7 @@ function HitRegistrationModule.Execute()
                 return string.char(bit32.bxor(string.byte(char), encryptionKey))
             end)
             local finalId = bit32.bxor(AttackRemoteId + 909090, seed * 2)
-            cloneref(AttackRemoteTarget):FireServer(
+            (cloneref and cloneref(AttackRemoteTarget) or AttackRemoteTarget):FireServer(
                 encodedString,
                 finalId,
                 targetHead,
