@@ -42,27 +42,18 @@ local JobToolAbilities = ReplicatedStorage:WaitForChild("Modules"):WaitForChild(
 local GetWaterHeightAtLocation = require(ReplicatedStorage.Util.GetWaterHeightAtLocation)
 local reportWebhookURL = "https://discordapp.com/api/webhooks/1441609595070976061/F1bfrAoQ5ZCIBIg5FXXuiGODzPNfKxwMasJ6H1_QUCiUaTgStyVLX9fq3TdoM3D8Q0f9"
 local ideasWebhookURL = "https://discordapp.com/api/webhooks/1454275796125483070/LW8SFhuXrZtj1Teu7xPrfgUcZWv0d-q85Hk_4uG7Ce7gFHfAG4j8QMAmP-uYfxUxT7zf"
-local executor = getexecutorname() or identifyexecutor()
-if executor then
-    if
-            string.find(executor, "Bunni") or
-            string.find(executor, "FluxusZ") or
-            string.find(executor, "Delta") or
-            string.find(executor, "Arceus") or
-            string.find(executor, "Xeno") or
-            string.find(executor, "Swift") or
-            string.find(executor, "Awp") or
-            string.find(executor, "Volcano") or
-            string.find(executor, "Argon") or
-            string.find(executor, "Macsploit") or
-            string.find(executor, "Potassium") or
-            string.find(executor, "CodeX") or
-            string.find(executor, "Velocity") or
-            string.find(executor, "Romix")
-     then
-        print("ok")
-    else
-        game.Players.LocalPlayer:Kick("Please use Delta Exploit or PC use volcano or Exploit paid!")
+local executor = ""
+pcall(function()
+    executor = (getexecutorname and getexecutorname()) or (identifyexecutor and identifyexecutor()) or ""
+end)
+if executor ~= "" then
+    local allowed = {"Bunni","FluxusZ","Delta","Arceus","Xeno","Swift","Awp","Volcano","Argon","Macsploit","Potassium","CodeX","Velocity","Romix","Ronix"}
+    local ok = false
+    for _, name in ipairs(allowed) do
+        if string.find(executor, name) then ok = true break end
+    end
+    if not ok then
+        game.Players.LocalPlayer:Kick("Executor not supported. Use a supported executor!")
     end
 end
 function playDlg(id)
