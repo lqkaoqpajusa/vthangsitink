@@ -22,7 +22,7 @@ local CFG = {
     TELEPORT_INTERVAL = 2,
     HOP_INTERVAL      = 300,
     RAID_DIST         = 300,
-    RESET_INTERVAL    = 7,
+    RESET_INTERVAL    = 10,
 }
 
 local ST = {
@@ -186,7 +186,8 @@ local function escapeAndTeleport(targ)
         task.wait(0.6)
         if thrp then
             pcall(function()
-                myHRP.CFrame = CFrame.new(thrp.Position + Vector3.new(0, 3, 0))
+                local behind = thrp.CFrame * CFrame.new(0, 2, 3)
+                myHRP.CFrame = behind
                 getgenv().targ = targ
             end)
         end
@@ -232,12 +233,11 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(1)
-        ST.resetTimer += 1
-        if ST.resetTimer >= CFG.RESET_INTERVAL then
-            ST.resetTimer = 0
-            doReset()
+        ST.resetTimer = 0
+        for _ = 1, CFG.RESET_INTERVAL do
+            task.wait(1)
         end
+        doReset()
     end
 end)
 
@@ -279,7 +279,8 @@ task.spawn(function()
             local thrp = targ.Character:FindFirstChild("HumanoidRootPart")
             if thrp and myHRP then
                 pcall(function()
-                    myHRP.CFrame = CFrame.new(thrp.Position + Vector3.new(0, 3, 0))
+                    local behind = thrp.CFrame * CFrame.new(0, 2, 3)
+                    myHRP.CFrame = behind
                 end)
                 getgenv().targ = targ
             end
