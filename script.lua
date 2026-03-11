@@ -19,10 +19,9 @@ local lp           = Players.LocalPlayer
 local ch           = function() return lp.Character end
 
 local CFG = {
-    TELEPORT_INTERVAL = 2,
+    TELEPORT_INTERVAL = 10,
     HOP_INTERVAL      = 300,
     RAID_DIST         = 300,
-    RESET_INTERVAL    = 10,
 }
 
 local ST = {
@@ -32,7 +31,6 @@ local ST = {
     lastBounty   = 0,
     targIdx      = 1,
     hopTimer     = 0,
-    resetTimer   = 0,
     escapingZone = false,
 }
 
@@ -199,14 +197,6 @@ local function escapeAndTeleport(targ)
     end)
 end
 
-local function doReset()
-    pcall(function()
-        local c = ch() if not c then return end
-        local hum = c:FindFirstChild("Humanoid") if not hum then return end
-        hum.Health = 0
-    end)
-end
-
 task.spawn(function()
     repeat task.wait() until game:IsLoaded()
     repeat task.wait() until lp and lp.Character
@@ -231,60 +221,77 @@ task.spawn(function()
     end
 end)
 
-task.spawn(function()
-    while true do
-        ST.resetTimer = 0
-        for _ = 1, CFG.RESET_INTERVAL do
-            task.wait(1)
+local notifConn = nil
+local function showNotif(name)
+    pcall(function()
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title    = "⚡ TRon Void  |  Alvo",
+            Text     = "Atacando: " .. name,
+            Duration = 4,
+        })
+    end)
+end
+
+local function getValidTargets()
+    local list = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= lp and p.Character then
+            local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+            local hum = p.Character:FindFirstChild("Humanoid")
+            if hrp and hum and hum.Health > 0 and not inSafe(hrp) and not checkRaid(p) then
+                table.insert(list, p)
+            end
         end
-        doReset()
     end
-end)
+    return list
+end
+
+local function jumpToNext()
+    if not ST.farmOn then return end
+    local myC   = ch()
+    local myHRP = myC and myC:FindFirstChild("HumanoidRootPart")
+    if not myHRP then return end
+
+    if inSafe(myHRP) and not ST.escapingZone then
+        local list = getValidTargets()
+        task.spawn(function() escapeAndTeleport(#list > 0 and list[1] or nil) end)
+        return
+    end
+
+    local list = getValidTargets()
+    if #list == 0 then getgenv().targ = nil return end
+    ST.targIdx = (ST.targIdx % #list) + 1
+    local targ = list[ST.targIdx]
+    if not targ or not targ.Character then return end
+    local thrp = targ.Character:FindFirstChild("HumanoidRootPart")
+    if thrp then
+        pcall(function() myHRP.CFrame = thrp.CFrame * CFrame.new(0, 2, 3) end)
+        getgenv().targ = targ
+        showNotif(targ.Name)
+
+        if notifConn then notifConn:Disconnect() notifConn = nil end
+        local hum = targ.Character:FindFirstChild("Humanoid")
+        if hum then
+            notifConn = hum.Died:Connect(function()
+                if notifConn then notifConn:Disconnect() notifConn = nil end
+                task.wait(0.15)
+                jumpToNext()
+            end)
+        end
+        targ.CharacterRemoving:Connect(function()
+            if getgenv().targ == targ then
+                task.wait(0.15)
+                jumpToNext()
+            end
+        end)
+    end
+end
 
 task.spawn(function()
     while true do
         task.wait(CFG.TELEPORT_INTERVAL)
         if not ST.farmOn then continue end
-
-        local myC   = ch()
-        local myHRP = myC and myC:FindFirstChild("HumanoidRootPart")
-        if myHRP and inSafe(myHRP) and not ST.escapingZone then
-            local plrList = {}
-            for _, p in ipairs(Players:GetPlayers()) do
-                if p ~= lp and p.Character then
-                    local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-                    if hrp and not inSafe(hrp) and not checkRaid(p) then
-                        table.insert(plrList, p)
-                    end
-                end
-            end
-            local targ = #plrList > 0 and plrList[1] or nil
-            task.spawn(function() escapeAndTeleport(targ) end)
-            continue
-        end
-
-        local plrList = {}
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= lp and p.Character then
-                local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-                if hrp and not inSafe(hrp) and not checkRaid(p) then
-                    table.insert(plrList, p)
-                end
-            end
-        end
-        if #plrList == 0 then continue end
-        ST.targIdx = (ST.targIdx % #plrList) + 1
-        local targ = plrList[ST.targIdx]
-        if targ and targ.Character then
-            local thrp = targ.Character:FindFirstChild("HumanoidRootPart")
-            if thrp and myHRP then
-                pcall(function()
-                    local behind = thrp.CFrame * CFrame.new(0, 2, 3)
-                    myHRP.CFrame = behind
-                end)
-                getgenv().targ = targ
-            end
-        end
+        jumpToNext()
     end
 end)
 
