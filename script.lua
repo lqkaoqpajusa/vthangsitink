@@ -110,20 +110,32 @@ local function IsInSafeZone(pos)
 	return false
 end
 
-local function IsWorldRestricted()
-	local mapNode = Workspace:FindFirstChild("Map")
-	local mapName = mapNode and mapNode.Name or ""
-	for _, kw in ipairs({"raid","leviathan","dungeon","boss","colosseum","arena","castle"}) do
-		if string.find(mapName:lower(), kw) then return true end
+local RAID_ZONES = {
+	{pos = Vector3.new(  500, 200,  1800), range = 500},
+	{pos = Vector3.new( -500, 200,  1800), range = 500},
+	{pos = Vector3.new( 6000, 300,  6000), range = 600},
+	{pos = Vector3.new(-6000, 300, -6000), range = 600},
+	{pos = Vector3.new(    0, 500,     0), range = 700},
+}
+
+local function IsPlayerInRestrictedZone(pos)
+	for _, zone in ipairs(RAID_ZONES) do
+		if (pos - zone.pos).Magnitude < zone.range then return true end
 	end
-	if Workspace:FindFirstChild("Raid")       then return true end
-	if Workspace:FindFirstChild("RaidIsland") then return true end
-	if Workspace:FindFirstChild("RaidBoss")   then return true end
 	return false
 end
 
 local function PlayerHasPvP(player)
-	local found = false
+	SafeCall(function()
+		local myTeam    = LP.Team
+		local theirTeam = player.Team
+		if myTeam and theirTeam then
+			if myTeam ~= theirTeam then return end
+		end
+	end)
+
+	local pvpOn = true
+
 	SafeCall(function()
 		for _, guiChild in ipairs(LP.PlayerGui:GetChildren()) do
 			for _, desc in ipairs(guiChild:GetDescendants()) do
@@ -131,8 +143,11 @@ local function PlayerHasPvP(player)
 					local txt = desc.Text or ""
 					if txt == player.DisplayName or txt == player.Name or txt == "@"..player.Name then
 						for _, sib in ipairs(desc.Parent:GetChildren()) do
-							if sib:IsA("ImageLabel") and string.find(sib.Name:upper(), "PVP") then
-								if sib.Visible and sib.ImageTransparency <= 0.5 then found = true end
+							local nm = sib.Name:upper()
+							if sib:IsA("ImageLabel") and (string.find(nm,"PVP") or string.find(nm,"PVPICON")) then
+								if not sib.Visible or sib.ImageTransparency > 0.5 then
+									pvpOn = false
+								end
 							end
 						end
 					end
@@ -140,15 +155,8 @@ local function PlayerHasPvP(player)
 			end
 		end
 	end)
-	if found then return true end
-	SafeCall(function()
-		local ls = player:FindFirstChild("leaderstats")
-		if ls then
-			local b = ls:FindFirstChild("Bounty") or ls:FindFirstChild("Kills")
-			if b and (tonumber(b.Value) or 0) > 0 then found = true end
-		end
-	end)
-	return found
+
+	return pvpOn
 end
 
 local function IsValidTarget(player)
@@ -160,7 +168,7 @@ local function IsValidTarget(player)
 	if not IsCharAlive(char) then return false end
 	if not PlayerHasPvP(player) then return false end
 	if IsInSafeZone(hrp.Position) then return false end
-	if IsWorldRestricted() then return false end
+	if IsPlayerInRestrictedZone(hrp.Position) then return false end
 	local myLv = GetPlayerLevel(LP)
 	local tgLv = GetPlayerLevel(player)
 	if math.abs(myLv - tgLv) > Config["Level Difference"] then return false end
@@ -393,25 +401,56 @@ end
 
 local function JoinTeam(teamName)
 	State.status = "Entrando no time: " .. teamName
-	SafeCall(function()
-		local remoteNames = {"ChooseTeam","JoinTeam","SelectTeam","ChangeTeam","TeamSelect"}
-		local remotesFolder = ReplicatedStorage:FindFirstChild("Remotes")
-		if remotesFolder then
-			for _, name in ipairs(remoteNames) do
-				local r = remotesFolder:FindFirstChild(name)
-				if r and r:IsA("RemoteEvent") then r:FireServer(teamName) task.wait(0.5) return end
-			end
-		end
-		for _, v in ipairs(ReplicatedStorage:GetDescendants()) do
-			if v:IsA("RemoteEvent") then
-				local nm = v.Name:lower()
-				if string.find(nm, "team") or string.find(nm, "chooseside") then
-					SafeCall(function() v:FireServer(teamName) end)
+
+	local teamLower = teamName:lower()
+	local clicked   = false
+
+	local function TryClickTeamButton()
+		for _, gui in ipairs(LP.PlayerGui:GetChildren()) do
+			for _, obj in ipairs(gui:GetDescendants()) do
+				if (obj:IsA("TextButton") or obj:IsA("ImageButton")) and obj.Visible then
+					local nm  = obj.Name:lower()
+					local txt = (obj:IsA("TextButton") and obj.Text or ""):lower()
+					if string.find(nm, teamLower) or string.find(txt, teamLower)
+					or (teamLower == "pirates"  and (string.find(nm,"pirate")  or string.find(txt,"pirate")))
+					or (teamLower == "marines"  and (string.find(nm,"marine")  or string.find(txt,"marine"))) then
+						SafeCall(function()
+							obj.MouseButton1Click:Fire()
+							fireproximityprompt = fireproximityprompt
+						end)
+						SafeCall(function() obj:activate() end)
+						clicked = true
+						return
+					end
 				end
 			end
 		end
-	end)
-	task.wait(2)
+	end
+
+	for i = 1, 6 do
+		TryClickTeamButton()
+		if clicked then break end
+		task.wait(1)
+	end
+
+	if not clicked then
+		SafeCall(function()
+			local remotesFolder = ReplicatedStorage:FindFirstChild("Remotes")
+			if remotesFolder then
+				for _, r in ipairs(remotesFolder:GetChildren()) do
+					if r:IsA("RemoteEvent") then
+						local nm = r.Name:lower()
+						if string.find(nm,"team") or string.find(nm,"chooseside") or string.find(nm,"selectside") then
+							r:FireServer(teamName)
+							task.wait(0.3)
+						end
+					end
+				end
+			end
+		end)
+	end
+
+	task.wait(1.5)
 end
 
 local function ApplyFixLag()
